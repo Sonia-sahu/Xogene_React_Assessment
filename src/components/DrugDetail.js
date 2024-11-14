@@ -1,62 +1,92 @@
-
 import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 
-function DrugDetail() {
-  const { drugName } = useParams();
+const DrugDetail = ({ drugName }) => {
+  const [rxnormId, setRxnormId] = useState(null);
+  const [synonyms, setSynonyms] = useState([]);
   const [ndcs, setNdcs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const[synonyms, setSynonyms]= useState([])
+  const [error, setError] = useState(null);
+
   useEffect(() => {
-    const fetchNDCs = async () => {
+    const fetchDrugDetails = async () => {
       try {
-        const response = await axios.get(`https://rxnav.nlm.nih.gov/REST/ndcs.json?drugName=${drugName}`);
-        setNdcs(response.data.ndcGroup.ndcList || []);
+        setLoading(true);
+        setError(null);
+
+      
         const rxcuiResponse = await axios.get(`https://rxnav.nlm.nih.gov/REST/rxcui.json?name=${drugName}`);
-            const rxcui = rxcuiResponse.data.idGroup.rxnormId[0];
-            
-            const ndcsResponse = await axios.get(`https://rxnav.nlm.nih.gov/REST/ndcs.json?drugName=${drugName}`);
-            setNdcs(ndcsResponse.data.ndcGroup.ndcList || []);
-            
-            const synonymsResponse = await axios.get(`https://rxnav.nlm.nih.gov/REST/synonyms.json?rxcui=${rxcui}`);
-            setSynonyms(synonymsResponse.data.synonymGroup.synonym || []);
+        console.log('RxNorm ID Response:', rxcuiResponse.data); 
+
+        const rxcui = rxcuiResponse.data.idGroup?.rxnormId?.[0] || null;
+        
+        if (!rxcui) {
+          setError("RxNorm ID not found for the provided drug.");
+          setLoading(false);
+          return;
+        }
+
+        setRxnormId(rxcui);
+
+        
+        const synonymsResponse = await axios.get(`https://rxnav.nlm.nih.gov/REST/rxcui/rxcui/properties?rxnormId=${rxcui}`);
+        console.log('Synonyms Response:', synonymsResponse.data); 
+        setSynonyms(synonymsResponse.data?.properties?.synonym || []);
+
+        const ndcsResponse = await axios.get(`https://rxnav.nlm.nih.gov/REST/rxcui/rxcui/ndcs?rxnormId=${rxcui}`);
+        console.log('NDCs Response:', ndcsResponse.data); 
+        setNdcs(ndcsResponse.data?.ndcGroup?.ndcList || []);
+        
       } catch (error) {
-        console.error("Error fetching NDCs:", error);
+        console.error('Error fetching drug details:', error);
+        setError("An error occurred while fetching the data.");
       } finally {
         setLoading(false);
       }
     };
-    fetchNDCs();
+
+    if (drugName) {
+      fetchDrugDetails();
+    }
   }, [drugName]);
 
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
   return (
-    <div className="drug-detail">
-      <header className="drug-detail-header">
-        <img src="/logo.png" alt="XOGENE LOGO" className="logo" />
-        <h1>DRUG DETAILS</h1>
-      </header>
-      <h2>{drugName}</h2>
-      {loading ? (
-        <p>Loading...</p>
+    <div>
+      <h2>Drug Details for "{drugName}"</h2>
+      {rxnormId ? (
+        <p><strong>RxNorm ID (RXCUI):</strong> {rxnormId}</p>
       ) : (
-        <div className="drug-info">
-          <p><strong>ID:</strong> {drugName}</p>
-          <p><strong>Synonyms:</strong>{synonyms.join(', ')}</p> 
-          <h3>NDCs</h3>
-          {ndcs.length > 0 ? (
-            <ul className="ndc-list">
-              {ndcs.map((ndc, index) => (
-                <li key={index}>{ndc}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>No NDCs found for this drug.</p>
-          )}
-        </div>
+        <p>No RxNorm ID found.</p>
+      )}
+
+      {synonyms.length > 0 ? (
+        <p><strong>Synonyms:</strong> {synonyms.join(', ')}</p>
+      ) : (
+        <p>No synonyms found.</p>
+      )}
+
+      {ndcs.length > 0 ? (
+        <>
+          <h3>Related National Drug Codes (NDCs):</h3>
+          <ul>
+            {ndcs.map((ndc, index) => (
+              <li key={index}>{ndc}</li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p>No related NDCs found for this drug.</p>
       )}
     </div>
   );
-}
+};
 
 export default DrugDetail;
