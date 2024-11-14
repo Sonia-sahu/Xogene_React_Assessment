@@ -1,4 +1,4 @@
-// import React, { useEffect, useState } from 'react';
+
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -42,7 +42,7 @@ function DrugDetail() {
       ) : (
         <div className="drug-info">
           <p><strong>ID:</strong> {drugName}</p>
-          <p><strong>Synonyms:</strong>{synonyms.join(', ')}</p> {/* Replace with actual synonym data */}
+          <p><strong>Synonyms:</strong>{synonyms.join(', ')}</p> 
           <h3>NDCs</h3>
           {ndcs.length > 0 ? (
             <ul className="ndc-list">
