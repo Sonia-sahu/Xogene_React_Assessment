@@ -1,0 +1,74 @@
+/* src/styles.css */
+.app-container {
+  font-family: Arial, sans-serif;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #f8f8f8;
+}
+
+.app-header .logo {
+  width: 50px;
+}
+
+.drug-search {
+  margin: 20px;
+}
+
+.search-box input {
+  padding: 8px;
+  margin-right: 10px;
+  width: 200px;
+}
+
+.search-box button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.drug-list, .suggestions-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.drug-list li, .suggestions-list li {
+  cursor: pointer;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.drug-list li:hover, .suggestions-list li:hover {
+  background-color: #f1f1f1;
+}
+
+.drug-detail {
+  margin: 20px;
+}
+
+.drug-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f8f8;
+  padding: 20px;
+}
+
+.drug-info {
+  margin-top: 20px;
+}
+
+.ndc-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.ndc-list li {
+  margin: 5px 0;
+}
